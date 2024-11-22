@@ -14,6 +14,7 @@
 #include "HealthComponent.h"
 #include "Mystic_Mercenary/Weapon/WeaponFactory.h"
 #include "Mystic_Mercenary/Weapon/Weapon.h"
+#include "Mystic_Mercenary/GrowthSystem/UTemporaryBuffManager.h"
 #include "Net/UnrealNetwork.h"
 
 const int32 AGreatSwordCharacter::MaxComboSteps;
@@ -22,8 +23,8 @@ AGreatSwordCharacter::AGreatSwordCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    // 무기 메쉬 컴포넌트 생성 및 설정
-    WeaponMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
+    // 무기 메쉬 컴포넌트 생성 및 설정 
+    WeaponMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
     WeaponMeshComponent->SetupAttachment(GetMesh(), TEXT("WeaponSocket")); // 소켓 이름 일치 필요
     WeaponMeshComponent->bCastDynamicShadow = true;
     WeaponMeshComponent->CastShadow = true;
@@ -85,6 +86,12 @@ AGreatSwordCharacter::AGreatSwordCharacter()
 
     // 레플리케이션 설정
     bReplicates = true;
+
+    CurrentBuffValue = 0.0f;
+    BuffDuration = 10.0f; // 버프 지속 시간 설정
+
+    // 버프 매니저 생성
+    BuffManager = CreateDefaultSubobject<UTemporaryBuffManager>(TEXT("BuffManager"));
 }
 
 void AGreatSwordCharacter::BeginPlay()
@@ -102,6 +109,12 @@ void AGreatSwordCharacter::BeginPlay()
     // 무기 생성 및 장착
     TScriptInterface<IWeapon> GreatSword = UWeaponFactory::CreateWeapon(TEXT("GreatSword"));
     EquipWeapon(GreatSword);
+
+    // 버프 매니저 초기화
+    if (BuffManager)
+    {
+        BuffManager->Initialize(this);
+    }
 }
 
 void AGreatSwordCharacter::Tick(float DeltaTime)
@@ -567,9 +580,68 @@ void AGreatSwordCharacter::EquipWeapon(TScriptInterface<IWeapon> NewWeapon)
         if (WeaponMeshComponent)
         {
             WeaponMeshComponent->SetVisibility(false);
-            WeaponMeshComponent->SetSkeletalMesh(nullptr);
+            WeaponMeshComponent->SetStaticMesh(nullptr);
         }
 
         CurrentWeapon = nullptr;
     }
+}
+
+// 버프 매니저 가져오기
+UTemporaryBuffManager* AGreatSwordCharacter::GetBuffManager() const
+{
+    return BuffManager;
+}
+
+// 일시적 버프 추가
+void AGreatSwordCharacter::AddTemporaryBuff(float BuffValue)
+{
+    CurrentBuffValue += BuffValue;
+
+    // 버프 타이머 시작
+    GetWorldTimerManager().SetTimer(BuffTimerHandle, this, &AGreatSwordCharacter::RemoveTemporaryBuff, BuffDuration, false);
+}
+
+// 일시적 버프 제거
+void AGreatSwordCharacter::RemoveTemporaryBuff()
+{
+    // 버프 효과 제거
+    CurrentBuffValue = 0.0f;
+    // 타이머 초기화
+    GetWorldTimerManager().ClearTimer(BuffTimerHandle);
+}
+
+// 특정 적 유형에 대한 데미지 증가
+void AGreatSwordCharacter::IncreaseDamageAgainstEnemyType(FName EnemyType, float DamageIncrease)
+{
+    if (DamageModifiers.Contains(EnemyType))
+    {
+        DamageModifiers[EnemyType] += DamageIncrease;
+    }
+    else
+    {
+        DamageModifiers.Add(EnemyType, DamageIncrease);
+    }
+}
+
+// 공격 시 데미지 계산
+float AGreatSwordCharacter::CalculateDamage(AActor* EnemyActor) const
+{
+    float BaseDamage = CurrentWeapon ? CurrentWeapon->GetBaseDamage() : 10.0f;
+    float TotalDamage = BaseDamage + CurrentBuffValue;
+
+    // 적 유형 가져오기
+    IEnemyInterface* Enemy = Cast<IEnemyInterface>(EnemyActor);
+    if (Enemy)
+    {
+        FName EnemyType = Enemy->GetEnemyType();
+
+        // 해당 적 유형에 대한 데미지 보너스 적용
+        if (DamageModifiers.Contains(EnemyType))
+        {
+            TotalDamage += DamageModifiers[EnemyType];
+        }
+    }
+
+    return TotalDamage;
 }

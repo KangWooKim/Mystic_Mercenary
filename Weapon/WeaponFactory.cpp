@@ -10,18 +10,16 @@ TScriptInterface<IWeapon> UWeaponFactory::CreateWeapon(FName WeaponType)
         UGreatSword* NewWeapon = NewObject<UGreatSword>();
         if (NewWeapon)
         {
-            // 무기 메쉬는 에디터를 통해 설정됩니다.
+            // 무기 메쉬 설정 (예시)
+            UStaticMesh* StaticMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Assets/Demo/Mannequin_UE4/Character/Mesh/Great_Sword"));
+            if (StaticMesh)
+            {
+                NewWeapon->SetWeaponMesh(StaticMesh);
+            }
+
             return TScriptInterface<IWeapon>(NewWeapon);
         }
     }
-    // else if (WeaponType == TEXT("Dagger"))
-    // {
-    //     UDagger* NewWeapon = NewObject<UDagger>();
-    //     if (NewWeapon)
-    //     {
-    //         return TScriptInterface<IWeapon>(NewWeapon);
-    //     }
-    // }
-    // 추가 무기 타입 처리
+
     return nullptr;
 }

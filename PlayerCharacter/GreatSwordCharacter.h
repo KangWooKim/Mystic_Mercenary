@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "AttackStrategy.h" // 공격 전략 헤더 추가
-#include "Mystic_Mercenary/Weapon/Weapon.h" // IWeapon 인터페이스 포함
+#include "AttackStrategy.h" 
+#include "Mystic_Mercenary/Weapon/Weapon.h" 
 #include "GreatSwordCharacter.generated.h"
 
 UENUM(BlueprintType)
@@ -42,7 +42,6 @@ protected:
         UStaticMeshComponent* WeaponMeshComponent;
 
 public:
-
     // AnimNotify 함수들
     UFUNCTION(BlueprintCallable)
         void EnableCombo();
@@ -143,8 +142,22 @@ public:
     // 현재 장착된 무기 반환
     TScriptInterface<IWeapon> GetCurrentWeapon() const { return CurrentWeapon; }
 
-private:
+    // 버프 매니저 가져오기
+    UTemporaryBuffManager* GetBuffManager() const;
 
+    // 일시적 버프 추가
+    void AddTemporaryBuff(float BuffValue);
+
+    // 일시적 버프 제거
+    void RemoveTemporaryBuff();
+
+    // 특정 적 유형에 대한 데미지 증가
+    void IncreaseDamageAgainstEnemyType(FName EnemyType, float DamageIncrease);
+
+    // 공격 시 데미지 계산
+    float CalculateDamage(AActor* EnemyActor) const;
+
+private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
         class UHealthComponent* HealthComponent;
 
@@ -233,6 +246,22 @@ private:
 
     UPROPERTY(EditAnywhere, Category = "Animation")
         UAnimMontage* StaminaEmptyHitMontage;
+
+    // 특정 적 유형에 대한 데미지 증가량을 저장하는 맵
+    TMap<FName, float> DamageModifiers;
+
+    // 버프 매니저
+    UPROPERTY()
+        UTemporaryBuffManager* BuffManager;
+
+    // 현재 적용된 일시적 버프 값
+    float CurrentBuffValue;
+
+    // 버프 지속 시간
+    float BuffDuration;
+
+    // 버프 타이머 핸들
+    FTimerHandle BuffTimerHandle;
 
 public:
     // 카메라 붐 컴포넌트 (카메라의 위치를 제어)
