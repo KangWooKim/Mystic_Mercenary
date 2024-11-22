@@ -3,9 +3,9 @@
 ## 1. UCharacterState 추상 클래스
 UCharacterState는 캐릭터의 모든 상태가 따라야 하는 기본 클래스입니다. 이 클래스는 상태 짂입, 업데이트, 종료 시 호출될 EnterState(), UpdateState(), 
 ExitState() 메서드를 정의하고 있으며, 각 상태 클래스는 이를 구현하여 자싞만의 행동을 정의합니다.
-*EnterState(AGreatSwordCharacter Character)**: 상태에 진입할 때 호출됩니다.
-*UpdateState(AGreatSwordCharacter Character, float DeltaTime)**: 상태가 유지되는 동안 매 프레임마다 호출되어 상태를 업데이트합니다.
-*ExitState(AGreatSwordCharacter Character)**: 상태가 끝날 때 호출됩니다.
+EnterState(AGreatSwordCharacter Character): 상태에 진입할 때 호출됩니다.
+UpdateState(AGreatSwordCharacter Character, float DeltaTime): 상태가 유지되는 동안 매 프레임마다 호출되어 상태를 업데이트합니다.
+ExitState(AGreatSwordCharacter Character): 상태가 끝날 때 호출됩니다.
 이 추상 클래스는 캐릭터의 각 상태에 대한 공통적인 인터페이스를 제공하며, 이를 통해 상태별로 고유한 행동을 정의할 수 있습니다.
 
 ## 2. 피격 상태 (HitState)와 사망 상태 (DeathState)
