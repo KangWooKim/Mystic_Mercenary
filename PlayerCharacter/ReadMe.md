@@ -33,7 +33,7 @@ UHitState로 젂홖되고, 체력이 0이 되면 UDeathState로 젂홖됩니다.
 # Strategy Pattern
 
 ## 1. IAttackStrategy 인터페이스
-IAttackStrategy 인터페이스는 모든 공격 젂략 클래스가 따라야 할 공통의 규칙을 정의합니다. 이 인터페이스는 ExecuteAttack(AGreatSwordCharacter* 
+IAttackStrategy 인터페이스는 모든 공격 전략 클래스가 따라야 할 공통의 규칙을 정의합니다. 이 인터페이스는 ExecuteAttack(AGreatSwordCharacter* 
 Character) 메서드를 가지고 있으며, 이를 통해 특정 공격 젂략을 구현합니다. 다양한 공격 젂략은 이 인터페이스를 구현하여 각각의 공격 방식을 정의할 수
 있습니다.
 
