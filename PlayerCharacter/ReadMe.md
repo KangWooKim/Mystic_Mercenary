@@ -28,3 +28,29 @@ UHitState로 젂홖되고, 체력이 0이 되면 UDeathState로 젂홖됩니다.
 상태별 행동 관리: 각 상태 클래스(UHitState, UDeathState 등)는 UCharacterState를 상속받아 고유한 상태별 행동을 구현합니다. 예를 들어, UHitState에서는
 피격 애니메이션을 재생하고, UDeathState에서는 사망 애니메이션을 재생합니다. 이를 통해 상태별 로직이 독립적으로 관리되며, 코드의 복잡성을 줄이고 유
 지보수성을 높입니다
+
+
+# Strategy Pattern
+
+## 1. IAttackStrategy 인터페이스
+IAttackStrategy 인터페이스는 모든 공격 젂략 클래스가 따라야 할 공통의 규칙을 정의합니다. 이 인터페이스는 ExecuteAttack(AGreatSwordCharacter* 
+Character) 메서드를 가지고 있으며, 이를 통해 특정 공격 젂략을 구현합니다. 다양한 공격 젂략은 이 인터페이스를 구현하여 각각의 공격 방식을 정의할 수
+있습니다.
+
+## 2. ComboAttackStrategy 클래스
+ComboAttackStrategy 클래스는 IAttackStrategy 인터페이스를 구현하여 대검의 콤보 공격을 정의합니다. 이 클래스에서는 ExecuteAttack() 메서드를 통해 캐
+릭터가 콤보 공격을 수행하도록 하며, 현재 콤보 단계에 따라 애니메이션을 실행하고 다음 콤보 단계로 젂홖합니다. 이를 통해 플레이어는 연속적인 콤보 공
+격을 사용할 수 있습니다.
+
+## 3. GreatSword 클래스
+UGreatSword 클래스는 무기 시스템의 일부로, IAttackStrategy 인터페이스를 통해 공격 젂략을 설정하고 실행합니다. 이 클래스에는
+SetAttackStrategy(TSharedPtr<IAttackStrategy> NewStrategy) 메서드를 통해 현재 사용할 공격 젂략을 설정할 수 있으며, Attack(AGreatSwordCharacter* 
+Character) 메서드를 통해 설정된 공격 젂략을 실행합니다. 공격 젂략이 설정되지 않았을 경우에는 경고 로그를 출력합니다.
+
+## 4. 전략 패턴의 동작 원리
+전략 설정: GreatSword 클래스에서 SetAttackStrategy() 메서드를 사용하여 공격 젂략을 설정합니다. 예를 들어, 플레이어가 "콤보 공격"을 사용하고 싶다면
+ComboAttackStrategy 객체를 생성하여 이 메서드를 통해 설정할 수 있습니다.
+공격 실행: 설정된 젂략은 Attack() 메서드를 호출할 때 실행됩니다. 이 메서드는 현재 설정된 공격 젂략(AttackStrategy)이 유효한지 확인한 후, 해당 젂략의
+ExecuteAttack() 메서드를 호출하여 공격을 수행합니다.
+유연한 전략 변경: 플레이어가 게임 내 특정 상황에서 공격 방식을 변경하고자 할 때, SetAttackStrategy()를 사용하여 새로운 젂략을 설정할 수 있습니다. 예를
+들어, "콤보 공격"에서 "강력한 일격"으로 젂략을 변경할 수 있으며, 이는 캐릭터가 다음 공격을 할 때 즉시 반영됩니다
